@@ -1,0 +1,7 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { getPrisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
+import { safeJson } from "@/lib/validation/common";
+const bodySchema=z.object({email:z.string().trim().toLowerCase().email().max(254),consent:z.literal(true)});
+export async function POST(request:Request){const ip=request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()??"unknown";const limit=rateLimit(`newsletter:${ip}`,5,60_000);if(!limit.allowed)return NextResponse.json({message:"Please wait a moment before trying again."},{status:429,headers:{"Retry-After":String(limit.retryAfter)}});let body:unknown;try{body=await safeJson(request,4000);}catch{return NextResponse.json({message:"Please check your email address and consent."},{status:400});}const parsed=bodySchema.safeParse(body);if(!parsed.success)return NextResponse.json({message:"Please enter a valid email and choose the consent box."},{status:400});if(!process.env.DATABASE_URL)return NextResponse.json({message:"Newsletter sign-up is unavailable until the database is configured."},{status:503});try{const db=getPrisma();await db.newsletterSubscriber.upsert({where:{email:parsed.data.email},create:{email:parsed.data.email,consentedAt:new Date()},update:{consentedAt:new Date(),unsubscribedAt:null}});return NextResponse.json({message:"You're on the list."});}catch(error){console.error("Newsletter subscription failed",error);return NextResponse.json({message:"We couldn't save that just now. Please try again."},{status:503});}}

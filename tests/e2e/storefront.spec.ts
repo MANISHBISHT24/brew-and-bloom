@@ -1,0 +1,7 @@
+import { expect, test } from "@playwright/test";
+
+test("home page presents the café menu and story",async({page})=>{await page.goto("/");await expect(page.getByRole("heading",{name:/your everyday ritual/i})).toBeVisible();await expect(page.getByRole("link",{name:/explore our menu/i})).toHaveAttribute("href","/menu");await expect(page.getByRole("link",{name:/discover our story/i})).toHaveAttribute("href","/about");});
+
+test("menu search filters catalogue and a guest can update the bag",async({page})=>{await page.goto("/menu");await expect(page.getByRole("heading",{name:/coffee & menu/i})).toBeVisible();await page.getByPlaceholder(/search coffee/i).fill("espresso");await expect(page.getByRole("link",{name:"House Espresso",exact:true})).toBeVisible();await expect(page.getByRole("link",{name:"Oat Milk Latte",exact:true})).toHaveCount(0);await page.getByRole("button",{name:/add/i}).click();await page.getByRole("link",{name:/shopping bag, 1 item/i}).click();await expect(page.getByRole("heading",{name:/in your bag/i})).toBeVisible();await page.getByRole("button",{name:/increase house espresso quantity/i}).click();await expect(page.locator(".cart-row .qty-control span")).toHaveText("2");});
+
+test("guest account page keeps private account routes out of search",async({page})=>{await page.goto("/account");await expect(page.getByRole("heading",{name:/welcome back/i})).toBeVisible();await expect(page).toHaveTitle(/your account/i);});

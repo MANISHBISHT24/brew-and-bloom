@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: brew_bloom
+      POSTGRES_USER: brew_bloom
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-replace-me}
+    ports:
+      - "5432:5432"
+    volumes:
+      - brew_bloom_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brew_bloom -d brew_bloom"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  brew_bloom_postgres:
