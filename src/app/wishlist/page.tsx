@@ -6,6 +6,7 @@ import { getCurrentSession } from "@/lib/session";
 import { getPrisma } from "@/lib/prisma";
 import { fromDb } from "@/lib/products";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your wishlist", robots: { index: false, follow: false } };
 
 export default async function WishlistPage() {

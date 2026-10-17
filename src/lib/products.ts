@@ -41,7 +41,7 @@ export const fromDb = (product: Prisma.ProductGetPayload<{ include: { category: 
 });
 
 export async function getProducts(): Promise<{ products: StoreProduct[]; preview: boolean; configured: boolean }> {
-  if (!process.env.DATABASE_URL) {
+  if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("replace-me")) {
     return process.env.NODE_ENV === "production" ? { products: [], preview: false, configured: false } : { products: demo, preview: true, configured: false };
   }
   try {
@@ -52,9 +52,8 @@ export async function getProducts(): Promise<{ products: StoreProduct[]; preview
     });
     return { products: products.map(fromDb), preview: false, configured: true };
   } catch (error) {
-    if (process.env.NODE_ENV === "production") throw error;
     console.error("Catalog database unavailable; showing explicitly marked preview products.", error);
-    return { products: demo, preview: true, configured: false };
+    return process.env.NODE_ENV === "production" ? { products: [], preview: false, configured: false } : { products: demo, preview: true, configured: false };
   }
 }
 
