@@ -13,5 +13,16 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" data-scroll-behavior="smooth"><body><CartProvider><SiteHeader/><main>{children}</main><SiteFooter/></CartProvider></body></html>;
+  return (
+    <html lang="en" data-scroll-behavior="smooth">
+      <body>
+        <a href="#main-content" className="skip-link">Skip to main content</a>
+        <CartProvider>
+          <SiteHeader />
+          <main id="main-content">{children}</main>
+          <SiteFooter />
+        </CartProvider>
+      </body>
+    </html>
+  );
 }

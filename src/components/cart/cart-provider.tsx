@@ -14,7 +14,7 @@ export type CartLine = {
   unitPrice: number;
   quantity: number;
 };
-type CartContextValue = { items: CartLine[]; count: number; subtotal: number; add: (product: StoreProduct, variantId?: string) => void; change: (key: string, quantity: number) => void; remove: (key: string) => void; clear: () => void };
+type CartContextValue = { items: CartLine[]; count: number; subtotal: number; add: (product: StoreProduct, variantId?: string, quantity?: number) => void; change: (key: string, quantity: number) => void; remove: (key: string) => void; clear: () => void };
 const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "brew-bloom-cart-v1";
 const toSelections = (lines: CartLine[]) => lines.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity }));
@@ -103,14 +103,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     items,
     count: items.reduce((sum, item) => sum + item.quantity, 0),
     subtotal: items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
-    add(product, variantId) {
+    add(product, variantId, qty = 1) {
       const variant = product.variants.find((item) => item.id === variantId) ?? product.variants[0];
       if (!variant || !product.available) return;
       const key = `${product.id}:${variant.id}`;
+      const toAdd = Math.max(1, Math.min(20, Math.floor(qty)));
       setItems((current) => {
         const existing = current.find((item) => item.key === key);
-        if (existing) return current.map((item) => item.key === key ? { ...item, quantity: Math.min(20, item.quantity + 1) } : item);
-        return [...current, { key, productId: product.id, slug: product.slug, name: product.name, image: product.image, variantId: variant.id, variantName: variant.name, unitPrice: product.price + variant.priceAdjustment, quantity: 1 }];
+        if (existing) return current.map((item) => item.key === key ? { ...item, quantity: Math.min(20, item.quantity + toAdd) } : item);
+        return [...current, { key, productId: product.id, slug: product.slug, name: product.name, image: product.image, variantId: variant.id, variantName: variant.name, unitPrice: product.price + variant.priceAdjustment, quantity: toAdd }];
       });
     },
     change(key, quantity) { setItems((current) => quantity <= 0 ? current.filter((item) => item.key !== key) : current.map((item) => item.key === key ? { ...item, quantity: Math.max(1, Math.min(20, Math.floor(quantity))) } : item)); },

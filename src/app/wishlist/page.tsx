@@ -24,5 +24,32 @@ export default async function WishlistPage() {
   });
   const products = wishlist.map(({ product }) => fromDb(product));
 
-  return <main className="shell page-wrap"><section className="page-hero"><div className="shell"><span className="eyebrow">Saved for another good day</span><h1>Your wishlist.</h1><p>A little list of the things you would like to enjoy again.</p></div></section><section className="shell wishlist-page">{products.length ? <div className="product-grid">{products.map((product) => <ProductCard key={product.id} product={product} saved />)}</div> : <div className="empty-state"><h2>Your list is waiting.</h2><p>Save a coffee or pastry from the menu and it will be right here.</p><Link className="button button-small" href="/menu">Explore the menu</Link></div>}</section></main>;
+  return (
+    <div className="page-wrap">
+      <section className="page-hero">
+        <div className="shell">
+          <span className="eyebrow">Saved for another good day</span>
+          <h1>Your wishlist.</h1>
+          <p>A little list of the coffees and pastries you would like to enjoy again.</p>
+        </div>
+      </section>
+      <section className="shell wishlist-page">
+        {products.length ? (
+          <div className="product-grid">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} saved />
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <h2>Your list is waiting.</h2>
+            <p>Save a coffee or pastry from the menu and it will be right here.</p>
+            <Link className="button button-small" href="/menu">
+              Explore the menu
+            </Link>
+          </div>
+        )}
+      </section>
+    </div>
+  );
 }
